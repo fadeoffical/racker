@@ -264,6 +264,7 @@ dependencies = [
  "chrono",
  "fern",
  "log",
+ "racker-common",
  "serde",
  "serde-xml-rs",
  "xml-rs",
@@ -272,6 +273,9 @@ dependencies = [
 [[package]]
 name = "racker-common"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "racker-daemon"

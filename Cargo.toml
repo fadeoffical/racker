@@ -23,4 +23,4 @@ racker-common = { path = "racker-common" }
 
 
 [workspace]
-members = [ "racker-daemon", "racker-common" ]
+members = ["racker-daemon", "racker-common"]

@@ -4,6 +4,8 @@ use std::io::Write;
 use std::path::Path;
 use serde::{Deserialize, Serialize};
 
+use racker_common::data::Network;
+
 const CONFIG_FILE_DEFAULT_PATH: &str = "racker.xml";
 const CONFIG_FILE_DEFAULT_CONTENTS: &str = include_str!("racker.xml");
 
@@ -65,40 +67,22 @@ pub(crate) fn load() -> Result<Config, io::Error> {
     config
 }
 
-#[derive(Serialize, Deserialize, Default, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct Config {
     network: Network,
 }
 
-impl Config {
-    pub(crate) fn network(&self) -> &Network {
-        &self.network
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "kebab-case")]
-pub(crate) struct Network {
-    host: String,
-    port: u16,
-}
-
-impl Default for Network {
+impl Default for Config {
     fn default() -> Self {
         Self {
-            host: String::from("127.0.0.1"),
-            port: 527,
+            network: Network::new("127.0.0.1", 527),
         }
     }
 }
 
-impl Network {
-    pub(crate) fn host(&self) -> &str {
-        &self.host
-    }
-
-    pub(crate) fn port(&self) -> u16 {
-        self.port
+impl Config {
+    pub(crate) fn network(&self) -> &Network {
+        &self.network
     }
 }
