@@ -18,16 +18,25 @@ pub(crate) fn init() {
 
             let file = match record.file() {
                 Some(file) => {
-                    &file[0..file.len() - 3]
+                    let file = file.split('/').last().unwrap_or(file);
+
+                    &file[..file.len() - 3]
                 },
                 None => "?"
             };
-            let module = record.module_path().unwrap_or("?");
+            let module = record.module_path().unwrap().split("::").next().unwrap_or("?");
             let line = record.line().unwrap_or(0);
 
             let module = format!("{}::{}:{}", module, file, line);
 
-            out.finish(format_args!("{}: {}", format_args!("[{}] [{:5}] [{:20}]", time, level, module), message))
+            // let modlen = module.len();
+            // let module = if modlen > 20 {
+            //     String::from("... ") + &module[modlen - 16..modlen]
+            // } else {
+            //     String::from(&module[0..modlen])
+            // };
+
+            out.finish(format_args!("{}: {}", format_args!("[{}] [{:5}] [{}]", time, level, module), message))
         })
         .level(log::LevelFilter::Debug)
         .chain(std::io::stdout())

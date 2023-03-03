@@ -6,6 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# racker
+racker-common = { path = "racker-common" }
+
 # logging
 log = "0.4"
 fern = { version = "0.6", features = ["colored"] }
@@ -18,8 +21,8 @@ serde = { version = "1.0", features = ["derive"] }
 serde-xml-rs = "0.6"
 xml-rs = "0.8"
 
-# racker
-racker-common = { path = "racker-common" }
+# http
+actix-web = { version = "4.3", features = ["rustls"] }
 
 
 [workspace]
