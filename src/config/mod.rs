@@ -21,7 +21,7 @@ pub(crate) fn load() -> Result<Config, io::Error> {
             Err(err) => {
                 log::error!("Failed to open config file at {}: {}", CONFIG_FILE_DEFAULT_PATH, err);
 
-                log::trace!("<- config::load()");
+                log::trace!("Returning config::load()");
                 return Err(err);
             }
         };
