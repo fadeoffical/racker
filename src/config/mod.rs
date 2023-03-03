@@ -5,7 +5,7 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 
 const CONFIG_FILE_DEFAULT_PATH: &str = "racker.xml";
-const CONFIG_FILE_DEFAULT_CONTENTS: &str = r#"<?xml version="1.0" encoding="UTF-8"?>"#;
+const CONFIG_FILE_DEFAULT_CONTENTS: &str = include_str!("racker.xml");
 
 pub(crate) fn load() -> Result<Config, io::Error> {
     log::trace!("Entered config::load()");
