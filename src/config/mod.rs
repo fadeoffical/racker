@@ -65,7 +65,7 @@ pub(crate) fn load() -> Result<Config, io::Error> {
     config
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Debug)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct Config {
     network: Network,
@@ -77,7 +77,7 @@ impl Config {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct Network {
     host: String,

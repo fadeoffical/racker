@@ -19,7 +19,7 @@ fn main() {
         }
     };
 
-    log::info!("Host: {}", config.network().host());
+    log::debug!("Loaded config: {:?}", config);
 }
 
 fn log_error_and_panic(err: Error) -> ! {
