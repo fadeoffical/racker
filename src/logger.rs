@@ -29,14 +29,7 @@ pub(crate) fn init() {
 
             let module = format!("{}::{}:{}", module, file, line);
 
-            // let modlen = module.len();
-            // let module = if modlen > 20 {
-            //     String::from("... ") + &module[modlen - 16..modlen]
-            // } else {
-            //     String::from(&module[0..modlen])
-            // };
-
-            out.finish(format_args!("{}: {}", format_args!("[{}] [{:5}] [{}]", time, level, module), message))
+            out.finish(format_args!("{}: {}", format_args!("[{}] [{}] [{}]", time, level, module), message))
         })
         .level(log::LevelFilter::Debug)
         .chain(std::io::stdout())

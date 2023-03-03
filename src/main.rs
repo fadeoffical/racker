@@ -1,9 +1,11 @@
 use std::io::Error;
 use actix_web::{App, HttpServer};
 use actix_web::web::resource;
+use log::log;
 
 mod logger;
 mod config;
+mod http;
 
 #[actix_web::main]
 async fn main() {
@@ -24,12 +26,10 @@ async fn main() {
     };
     log::debug!("Loaded config: {:?}", config);
 
+    log::info!("Starting HTTP server");
+    http::start(config).await;
 
-    HttpServer::new(|| {
-        App::new().service(resource("/").to(|| async {
-            r#"{ "message": "Hello, world!" }"#
-        }))
-    }).bind((config.network().host(), config.network().port())).unwrap().run().await.unwrap();
+    log::info!("HTTP server stopped");
 }
 
 fn log_error_and_panic(err: Error) -> ! {
