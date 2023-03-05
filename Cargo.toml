@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 # racker
 racker-common = { path = "racker-common" }
+racker-plugin = { path = "racker-plugin" }
 
 # logging
 log = "0.4"

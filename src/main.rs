@@ -1,5 +1,6 @@
 use std::io::Error;
 use std::sync::Mutex;
+use racker_plugin::PluginManager;
 use crate::config::Config;
 
 mod logger;
@@ -19,6 +20,26 @@ async fn main() {
     log::debug!("Logger initialized");
     log::info!("Starting racker");
 
+    let config = load_config();
+
+    log::info!("Loading plugins");
+    let plugin_manager = PluginManager::create();
+    plugin_manager.load_plugins_from_dir(&config.plugin_dir);
+
+    log::debug!("Creating state");
+    let state = RackerState {
+        config,
+        heads: Mutex::from(head::default()),
+    };
+    log::debug!("State created");
+
+    log::info!("Starting HTTP server");
+    http::start(state).await;
+
+    log::info!("HTTP server stopped");
+}
+
+fn load_config() -> Config {
     log::info!("Loading config");
     let config = match config::load() {
         Ok(config) => {
@@ -32,17 +53,7 @@ async fn main() {
     };
     log::debug!("Loaded config: {:?}", config);
 
-    log::debug!("Creating state");
-    let state = RackerState {
-        config,
-        heads: Mutex::from(head::default()),
-    };
-    log::debug!("State created");
-
-    log::info!("Starting HTTP server");
-    http::start(state).await;
-
-    log::info!("HTTP server stopped");
+    config
 }
 
 fn log_error_and_panic(err: Error) -> ! {
