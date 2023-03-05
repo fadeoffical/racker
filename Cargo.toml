@@ -27,4 +27,4 @@ actix-web = { version = "4.3", features = ["rustls"] }
 
 
 [workspace]
-members = ["racker-daemon", "racker-common"]
+members = ["racker-daemon", "racker-common", "racker-plugin"]

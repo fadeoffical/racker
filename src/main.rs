@@ -6,6 +6,7 @@ mod logger;
 mod config;
 mod http;
 mod head;
+mod plugin;
 
 pub(crate) struct RackerState {
     pub(crate) config: Config,
