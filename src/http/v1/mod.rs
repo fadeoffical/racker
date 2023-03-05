@@ -1,6 +1,5 @@
 use std::sync::{MutexGuard, PoisonError};
-use std::task::ready;
-use crate::http::response::{Response, Status};
+use crate::http::response::Response;
 use crate::RackerState;
 
 use serde::{Deserialize, Serialize};

@@ -2,7 +2,7 @@ pub(crate) mod response;
 pub(crate) mod v1;
 
 use actix_web::{web, App, HttpServer};
-use crate::http::response::{Apis, Response, ApiInfo, Status};
+use crate::http::response::{Apis, Response, ApiInfo};
 use crate::RackerState;
 
 pub(crate) async fn start(state: RackerState) {
