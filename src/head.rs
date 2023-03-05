@@ -9,8 +9,8 @@ pub(crate) struct Head {
     pub(crate) name: String,
 }
 
-impl From<v1::V1Head> for Head {
-    fn from(head: v1::V1Head) -> Self {
+impl From<v1::heads::V1Head> for Head {
+    fn from(head: v1::heads::V1Head) -> Self {
         Self {
             name: head.name,
         }
@@ -35,6 +35,15 @@ impl Heads {
         }
 
         self.heads.push(head);
+        Ok(())
+    }
+
+    pub(crate) fn unregister_head(&mut self, name: String) -> Result<(), ()> {
+        if !self.has_head(name.clone()) {
+            return Err(());
+        }
+
+        self.heads.retain(|head| head.name != name);
         Ok(())
     }
 
