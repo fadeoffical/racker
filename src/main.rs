@@ -21,7 +21,7 @@ async fn main() {
     log::info!("Loading config");
     let config = match config::load() {
         Ok(config) => {
-            log::info!("Config loaded successfully");
+            log::debug!("Config loaded successfully");
             config
         }
         Err(err) => {
