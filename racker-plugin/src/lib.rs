@@ -1,14 +1,30 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+use std::any::Any;
+#[macro_export]
+macro_rules! racker_plugin {
+    ($pl_t:ty, $pl_c:path) => {
+        #[no_mangle]
+        pub extern "C" fn _racker_plugin_create() -> *mut dyn $crate::Plugin {
+            let constructor: fn() -> $pl_t = $pl_c;
+            let plugin = constructor();
+            Box::into_raw(Box::new(plugin))
+        }
+    };
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub trait Plugin: Any + Send + Sync {
+    /// Returns the plugin's metadata.
+    fn meta(&self) -> PluginMeta;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+    /// Called when the plugin is loaded.
+    fn on_load(&self);
+
+    /// Called when the plugin is unloaded.
+    fn on_unload(&self);
+}
+
+pub struct PluginMeta {
+    pub name: String,
+    pub version: String,
+    pub description: String,
+    pub author: String,
 }
