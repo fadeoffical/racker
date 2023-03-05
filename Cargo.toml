@@ -16,8 +16,9 @@ fern = { version = "0.6", features = ["colored"] }
 # time
 chrono = "0.4"
 
-# config
+# serde
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 serde-xml-rs = "0.6"
 xml-rs = "0.8"
 
