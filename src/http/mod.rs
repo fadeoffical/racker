@@ -1,19 +1,25 @@
-mod response;
-mod v1;
+pub(crate) mod response;
+pub(crate) mod v1;
 
-use actix_web::{App, HttpRequest, HttpServer};
-use actix_web::web;
-use actix_web::web::resource;
-use crate::config::Config;
-use crate::http::response::{ApiStatus, RackerResponse, RackerStatus};
+use actix_web::{web, App, HttpServer};
+use crate::http::response::{Apis, Response, ApiInfo, Status};
+use crate::RackerState;
 
-pub(crate) async fn start(config: Config) {
-    let server = HttpServer::new(|| {
-        let api_v1 = web::scope("/v1")
-            .service(resource("/").route(web::get().to(v1::index)));
+pub(crate) async fn start(state: RackerState) {
+    let config = state.config.clone();
+
+    let data = web::Data::new(state);
+    let server = HttpServer::new(move || {
 
         App::new()
-            .service(api_v1)
+            .app_data(data.clone())
+            .service(
+                web::scope("/v1")
+                    .service(v1::get_index)
+                    .service(v1::get_heads)
+                    .service(v1::post_heads)
+                    .service(v1::get_head_by_name)
+            )
             .route("/", web::get().to(index))
     });
 
@@ -37,14 +43,14 @@ pub(crate) async fn start(config: Config) {
     };
 }
 
-async fn index(_request: HttpRequest) -> web::Json<RackerResponse<RackerStatus>> {
-    web::Json(RackerResponse {
-        status: "OK".to_string(),
-        data: RackerStatus {
-            api: ApiStatus {
+
+async fn index() -> web::Json<Response<ApiInfo, ()>> {
+    web::Json(Response::Ok {
+        data: Some(ApiInfo {
+            api: Apis {
                 latest: "v1".to_string(),
                 supported: vec!["v1".to_string()],
             },
-        },
+        }),
     })
 }
