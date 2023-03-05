@@ -1,7 +1,4 @@
 use std::io::Error;
-use actix_web::{App, HttpServer};
-use actix_web::web::resource;
-use log::log;
 
 mod logger;
 mod config;
