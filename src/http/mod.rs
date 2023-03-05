@@ -23,13 +23,12 @@ pub(crate) async fn start(state: RackerState) {
             .route("/", web::get().to(index))
     });
 
-    let host = config.network().host();
-    let port = config.network().port();
+    let host = config.network().as_socket_addr();
 
-    let server = match server.bind((host, port)) {
+    let server = match server.bind(host) {
         Ok(server) => server,
         Err(err) => {
-            log::error!("Failed to bind to {}:{}", host, port);
+            log::error!("Failed to bind to {:?}", host);
             crate::log_error_and_panic(err);
         }
     };

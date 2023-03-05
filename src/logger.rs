@@ -31,6 +31,7 @@ pub(crate) fn init() {
 
             out.finish(format_args!("{}: {}", format_args!("[{}] [{}] [{}]", time, level, module), message))
         })
+        .filter(|metadata| metadata.target().starts_with("racker"))
         .level(log::LevelFilter::Debug)
         .chain(std::io::stdout())
         .apply()

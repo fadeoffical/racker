@@ -25,6 +25,10 @@ impl Network {
     pub fn port(&self) -> u16 {
         self.port
     }
+
+    pub fn as_socket_addr(&self) -> SocketAddr {
+        SocketAddr::new(self.host.parse().unwrap(), self.port)
+    }
 }
 
 impl From<SocketAddr> for Network {
