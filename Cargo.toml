@@ -12,8 +12,8 @@ repository = "https://github.com/fadeoffical/racker"
 
 [dependencies]
 # racker
-racker-common = "0.1"
-racker-plugin = "0.1"
+racker-common = { version = "0.1", path = "racker-common" }
+racker-plugin = { version = "0.1", path = "racker-plugin" }
 
 # logging
 log = "0.4"
