@@ -5,10 +5,9 @@ use std::any::Any;
 use std::{fs, io};
 use std::path::PathBuf;
 use zip::ZipArchive;
-use serde::Deserialize;
 use crate::manifest::PluginManifest;
 
-use crate::plugin::PluginContainer;
+use crate::plugin::{PluginContainer, PluginState};
 
 /// Declares a plugin.
 #[macro_export]
@@ -64,10 +63,10 @@ impl PluginManager {
         let plugin_dir = fs::canonicalize(plugin_dir)?;
         let plugin_files = fs::read_dir(&plugin_dir)?;
 
-        let mut tmp_plugin_dirs: Vec<PathBuf> = Vec::new();
-
         for plugin_file in plugin_files {
-            let plugin_path = plugin_file?.path();
+            let plugin_file = plugin_file?;
+
+            let plugin_path = plugin_file.path();
             let path_str = plugin_path.to_str().unwrap();
 
             if !plugin_path.is_file() {
@@ -79,7 +78,7 @@ impl PluginManager {
                 continue;
             }
 
-            log::info!("Loading plugin: {}", &path_str);
+            log::info!("Loading plugin: {}", &plugin_file.file_name().to_str().unwrap());
 
             // temp/plugins/ + plugin.zip = temp/plugins/plugin.zip
             let tmp_plugin_path = plugin_run_dir.join(plugin_path.file_name().unwrap());
@@ -122,8 +121,10 @@ impl PluginManager {
     }
 
     fn load(&mut self) {
-        self.plugins.iter()
-            .for_each(|dir| {
+        self.plugins.iter_mut()
+            .for_each(|container| {
+                // container.plugin().on_load(); todo
+                container.set_state(PluginState::Loaded)
             });
     }
 

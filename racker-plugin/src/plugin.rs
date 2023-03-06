@@ -62,6 +62,10 @@ impl PluginContainer {
         &self.state
     }
 
+    pub fn set_state(&mut self, state: PluginState) {
+        self.state = state;
+    }
+
     pub fn manifest(&self) -> PluginManifest {
         self.manifest.as_ref().unwrap().clone()
     }
@@ -81,6 +85,12 @@ impl PluginContainer {
     pub fn plugin(&self) -> &dyn Plugin {
         self.plugin.as_ref().unwrap().as_ref()
     }
+
+    pub fn plugin_mut(&mut self) -> &mut dyn Plugin {
+        self.plugin.as_mut().unwrap().as_mut()
+    }
+
+
 }
 
 pub struct PluginReference {

@@ -7,7 +7,9 @@ pub struct PluginManifest {
     version: Option<String>,
     description: Option<String>,
     license: Option<String>,
+    repository: Option<String>,
     authors: Option<Vec<Author>>,
+    binaries: Vec<Binary>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -50,4 +52,17 @@ impl Default for Socials {
             discord: None,
         }
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Binary {
+    arch: String,
+    platform: String,
+    file: File,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct File {
+    path: String,
+    sha1: String,
 }
