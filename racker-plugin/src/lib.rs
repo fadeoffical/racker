@@ -1,5 +1,14 @@
+pub mod plugin;
+pub mod meta;
+
 use std::any::Any;
-use libloading::{Library, Symbol};
+use std::{fs, io};
+use std::path::PathBuf;
+use zip::ZipArchive;
+use serde::Deserialize;
+use crate::meta::PluginMeta;
+
+use crate::plugin::PluginContainer;
 
 /// Declares a plugin.
 #[macro_export]
@@ -15,9 +24,6 @@ macro_rules! racker_plugin {
 }
 
 pub trait Plugin: Any + Send + Sync {
-    /// Returns the plugin's metadata.
-    fn meta(&self) -> PluginMeta;
-
     /// Called when the plugin is loaded.
     fn on_load(&self);
 
@@ -25,54 +31,126 @@ pub trait Plugin: Any + Send + Sync {
     fn on_unload(&self);
 }
 
-pub struct PluginMeta {
-    pub name: String,
-    pub version: String,
-    pub description: String,
-    pub author: String,
+pub struct PluginManager {
+    plugins: Vec<PluginContainer>,
 }
 
-pub struct PluginManager {
-    plugins: Vec<Box<dyn Plugin>>,
-    loaded_libraries: Vec<Library>,
-}
+const PLUGIN_DIR: &str = "plugins";
+const PLUGIN_EXT: &str = "zip";
+const PLUGIN_RUN_DIR: &str = "temp/plugins";
 
 impl PluginManager {
     pub fn create() -> Self {
-        Self { plugins: Vec::new(), loaded_libraries: Vec::new() }
-    }
-
-    pub fn load_plugin_from_file(&mut self, path: &str) {
-        unsafe {
-            let lib = Library::new(path).unwrap();
-            let create: Symbol<unsafe fn() -> *mut dyn Plugin> = lib.get(b"_racker_plugin_create").unwrap();
-            let plugin = create();
-            let plugin = Box::from_raw(plugin);
-
-            plugin.on_load();
-
-            self.plugins.push(plugin);
-            self.loaded_libraries.push(lib);
+        Self {
+            plugins: Vec::new(),
         }
     }
 
-    pub fn load_plugin(&mut self, plugin: Box<dyn Plugin>) {
-        plugin.on_load();
-        self.plugins.push(plugin);
+    pub fn load_plugins(mut self) -> Self {
+        self.init().unwrap();
+        self.unzip_plugins().unwrap();
+        self.load();
+        self
     }
+}
 
-    pub fn unload_plugin(&mut self, name: &str) {
-        let mut index = None;
-        for (i, plugin) in self.plugins.iter().enumerate() {
-            if plugin.meta().name == name {
-                index = Some(i);
-                break;
+impl PluginManager {
+    fn init(&mut self) -> Result<(), io::Error> {
+        let plugin_dir = get_plugin_dir()?;
+        let plugin_run_dir = get_temp_dir()?;
+
+        let plugin_dir = fs::canonicalize(plugin_dir)?;
+        let plugin_files = fs::read_dir(&plugin_dir)?;
+
+        let mut tmp_plugin_dirs: Vec<PathBuf> = Vec::new();
+
+        for plugin_file in plugin_files {
+            let plugin_path = plugin_file?.path();
+            let path_str = plugin_path.to_str().unwrap();
+
+            if !plugin_path.is_file() {
+                continue;
             }
+
+            if !plugin_path.extension().unwrap().eq(PLUGIN_EXT) {
+                log::warn!("Invalid plugin file: {}", &path_str);
+                continue;
+            }
+
+            log::info!("Loading plugin: {}", &path_str);
+
+            // temp/plugins/ + plugin.zip = temp/plugins/plugin.zip
+            let tmp_plugin_path = plugin_run_dir.join(plugin_path.file_name().unwrap());
+
+            let tmp_plugin_dir = create_dir(tmp_plugin_path.to_str().unwrap())?;
+
+            // temp/plugins/plugin.zip + plugin.zip = temp/plugins/plugin.zip/plugin.zip
+            let tmp_plugin_file_path = tmp_plugin_dir.join(plugin_path.file_name().unwrap());
+
+            fs::copy(&plugin_path, &tmp_plugin_file_path)?;
+
+            let plugin = PluginContainer::init(tmp_plugin_dir, tmp_plugin_file_path);
+            self.plugins.push(plugin);
         }
 
-        if let Some(i) = index {
-            self.plugins[i].on_unload();
-            self.plugins.remove(i);
-        }
+        Ok(())
     }
+
+    fn unzip_plugins(&mut self) -> Result<(), io::Error> {
+        self.plugins.iter()
+            .map(|container| (container.tmp_dir(), container.tmp_file()))
+            .for_each(|(_dir, file)| {
+                let zip_file = fs::File::open(&file).unwrap();
+                let mut zip = ZipArchive::new(zip_file).unwrap();
+
+                let plugin_file = match zip.by_name("plugin.json") {
+                    Ok(file) => file,
+                    Err(_) => {
+                        log::error!("Plugin has no meta: {}", &file.file_name().unwrap().to_str().unwrap());
+                        return;
+                    }
+                };
+                let plugin_meta: PluginMeta = serde_json::from_reader(plugin_file).unwrap();
+
+                log::info!("Plugin: {:?}", plugin_meta);
+
+            });
+
+        Ok(())
+    }
+
+    fn load(&mut self) {
+        self.plugins.iter()
+            .for_each(|dir| {
+            });
+    }
+
+    // pub fn load_plugin_from_file(&mut self, path: &str) {
+    //     unsafe {
+    //         let lib = Library::new(path).unwrap();
+    //         let create: Symbol<unsafe fn() -> *mut dyn Plugin> = lib.get(b"_racker_plugin_create").unwrap();
+    //         let plugin = create();
+    //         let plugin = Box::from_raw(plugin);
+    //
+    //         plugin.on_load();
+    //     }
+    // }
+}
+
+fn create_dir(path: &str) -> Result<PathBuf, io::Error> {
+    let dir = PathBuf::from(path);
+    if !dir.exists() {
+        fs::create_dir_all(&dir)?;
+    }
+    Ok(dir)
+}
+
+fn get_plugin_dir() -> Result<PathBuf, io::Error> {
+    let plugin_dir = create_dir(PLUGIN_DIR)?;
+    Ok(plugin_dir)
+}
+
+fn get_temp_dir() -> Result<PathBuf, io::Error> {
+    let temp_dir = create_dir(PLUGIN_RUN_DIR)?;
+    Ok(temp_dir)
 }

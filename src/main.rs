@@ -23,8 +23,7 @@ async fn main() {
     let config = load_config();
 
     log::info!("Loading plugins");
-    let plugin_manager = PluginManager::create();
-    // plugin_manager.load_plugins_from_dir(&config.plugin_dir);
+    let mut plugin_manager = PluginManager::create().load_plugins();
 
     log::debug!("Creating state");
     let state = RackerState {
