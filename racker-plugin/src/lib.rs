@@ -100,20 +100,28 @@ impl PluginManager {
     fn unzip_plugins(&mut self) -> Result<(), io::Error> {
         self.plugins.iter()
             .map(|container| (container.tmp_dir(), container.tmp_file()))
-            .for_each(|(_dir, file)| {
-                let zip_file = fs::File::open(&file).unwrap();
-                let mut zip = ZipArchive::new(zip_file).unwrap();
+            .for_each(|(_dir, plugin_file)| {
+                let plugin_file_name = &plugin_file.file_name().unwrap().to_str().unwrap();
+                let plugin_file_zip = fs::File::open(&plugin_file).unwrap();
 
+                let mut zip = ZipArchive::new(plugin_file_zip).unwrap();
                 let plugin_file = match zip.by_name(PLUGIN_MANIFEST_FILE) {
                     Ok(file) => file,
                     Err(_) => {
-                        log::error!("Plugin has no manifest: {}", &file.file_name().unwrap().to_str().unwrap());
+                        log::error!("Plugin has no manifest: {}", &plugin_file_name);
                         return;
                     }
                 };
-                let plugin_manifest: PluginManifest = serde_json::from_reader(plugin_file).unwrap();
 
-                log::info!("Plugin: {:?}", plugin_manifest);
+                let plugin_manifest: PluginManifest = match serde_json::from_reader(plugin_file) {
+                    Ok(manifest) => manifest,
+                    Err(err) => {
+                        log::error!("Malformed plugin manifest for {}: {}", plugin_file_name, &err);
+                        return;
+                    }
+                };
+
+                log::debug!("Loaded plugin manifest for {}: {:?}", &plugin_file_name, plugin_manifest);
 
             });
 

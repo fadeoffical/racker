@@ -27,9 +27,9 @@ pub(crate) fn init() {
             let module = record.module_path().unwrap().split("::").next().unwrap_or("?");
             let line = record.line().unwrap_or(0);
 
-            let module = format!("{}::{}", module, file);
+            let module = format!("{module}::{file}:{line}");
 
-            out.finish(format_args!("{}: {}", format_args!("[{}] [{}] [{}]", time, level, module), message))
+            out.finish(format_args!("{}: {message}", format_args!("[{time}] [{level}] [{module}]")))
         })
         .filter(|metadata| metadata.target().starts_with("racker"))
         .level(log::LevelFilter::Debug)
