@@ -970,8 +970,8 @@ dependencies = [
  "chrono",
  "fern",
  "log",
- "racker-common",
- "racker-plugin",
+ "racker-common 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "racker-plugin 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "serde-xml-rs",
  "serde_json",
@@ -986,12 +986,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "racker-common"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "883786261972596a935c8bad5022aa771a9220202da11713ae34ccfd53736a75"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "racker-daemon"
 version = "0.1.0"
 
 [[package]]
 name = "racker-plugin"
 version = "0.1.0"
+dependencies = [
+ "libloading",
+]
+
+[[package]]
+name = "racker-plugin"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e9518127a491fc531bb311ad963a1689561e3ce5032f227c0e324144c1828279"
 dependencies = [
  "libloading",
 ]
