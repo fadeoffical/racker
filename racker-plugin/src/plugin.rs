@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use libloading::Library;
 
 use crate::Plugin;
-use crate::meta::PluginMeta;
+use crate::manifest::PluginManifest;
 
 pub type PluginId = usize;
 
@@ -34,7 +34,7 @@ pub struct PluginContainer {
     tmp_dir: PathBuf,
     tmp_file: PathBuf,
 
-    meta: Option<PluginMeta>,
+    manifest: Option<PluginManifest>,
     library: Option<Library>,
 }
 
@@ -49,7 +49,7 @@ impl PluginContainer {
             tmp_dir,
             tmp_file,
 
-            meta: None,
+            manifest: None,
             library: None,
         }
     }
@@ -62,8 +62,8 @@ impl PluginContainer {
         &self.state
     }
 
-    pub fn meta(&self) -> PluginMeta {
-        self.meta.as_ref().unwrap().clone()
+    pub fn manifest(&self) -> PluginManifest {
+        self.manifest.as_ref().unwrap().clone()
     }
 
     pub fn tmp_dir(&self) -> PathBuf {

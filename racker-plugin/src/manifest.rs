@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct PluginMeta {
+pub struct PluginManifest {
     name: String,
     version: Option<String>,
     description: Option<String>,

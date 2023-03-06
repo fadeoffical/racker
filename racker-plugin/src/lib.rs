@@ -1,12 +1,12 @@
 pub mod plugin;
-pub mod meta;
+pub mod manifest;
 
 use std::any::Any;
 use std::{fs, io};
 use std::path::PathBuf;
 use zip::ZipArchive;
 use serde::Deserialize;
-use crate::meta::PluginMeta;
+use crate::manifest::PluginManifest;
 
 use crate::plugin::PluginContainer;
 
@@ -38,6 +38,8 @@ pub struct PluginManager {
 const PLUGIN_DIR: &str = "plugins";
 const PLUGIN_EXT: &str = "zip";
 const PLUGIN_RUN_DIR: &str = "temp/plugins";
+
+const PLUGIN_MANIFEST_FILE: &str = "plugin.json";
 
 impl PluginManager {
     pub fn create() -> Self {
@@ -103,16 +105,16 @@ impl PluginManager {
                 let zip_file = fs::File::open(&file).unwrap();
                 let mut zip = ZipArchive::new(zip_file).unwrap();
 
-                let plugin_file = match zip.by_name("plugin.json") {
+                let plugin_file = match zip.by_name(PLUGIN_MANIFEST_FILE) {
                     Ok(file) => file,
                     Err(_) => {
-                        log::error!("Plugin has no meta: {}", &file.file_name().unwrap().to_str().unwrap());
+                        log::error!("Plugin has no manifest: {}", &file.file_name().unwrap().to_str().unwrap());
                         return;
                     }
                 };
-                let plugin_meta: PluginMeta = serde_json::from_reader(plugin_file).unwrap();
+                let plugin_manifest: PluginManifest = serde_json::from_reader(plugin_file).unwrap();
 
-                log::info!("Plugin: {:?}", plugin_meta);
+                log::info!("Plugin: {:?}", plugin_manifest);
 
             });
 
