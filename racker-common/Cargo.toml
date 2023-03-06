@@ -3,6 +3,10 @@ name = "racker-common"
 version = "0.1.0"
 edition = "2021"
 
+description = "Common code for Racker"
+license = "MIT"
+authors = ["fade <truefadeoffical@gmail.com>"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
