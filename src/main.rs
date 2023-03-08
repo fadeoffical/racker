@@ -19,11 +19,12 @@ pub(crate) struct RackerState {
 
 #[actix_web::main]
 async fn main() {
-    logger::init();
+    let cli = Cli::parse();
+
+    logger::init(&cli);
     log::debug!("Logger initialized");
     log::info!("Starting racker");
 
-    let cli = Cli::parse();
 
     log::info!("Loading config");
     let config = load_config(cli.clone());
@@ -45,7 +46,7 @@ async fn main() {
 }
 
 fn load_config(arguments: Cli) -> Config {
-    log::trace!("Entered main::load_config()");
+    log::trace!("-> main::load_config()");
     let config = match config::load(arguments) {
         Ok(config) => {
             log::debug!("Config loaded successfully");
@@ -58,7 +59,7 @@ fn load_config(arguments: Cli) -> Config {
     };
     log::debug!("Loaded config: {:?}", config);
 
-    log::trace!("Returning main::load_config()");
+    log::trace!("<- main::load_config()");
     config
 }
 

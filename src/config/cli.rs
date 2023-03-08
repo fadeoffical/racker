@@ -8,15 +8,18 @@ use crate::config::Config;
 pub(crate) const CONFIG_FILE_DEFAULT_PATH: &str = "/etc/racker/racker.json";
 
 #[derive(Debug, Clone, Parser)]
-#[clap(version = "0.1.0", author = "fade")]
+#[clap(author, version, about)]
 pub(crate) struct Cli {
-    #[clap(short, long, default_value = CONFIG_FILE_DEFAULT_PATH)]
+    #[clap(short, long, default_value = CONFIG_FILE_DEFAULT_PATH, help = "Path to the config file")]
     pub(crate) config_file: Option<PathBuf>,
 
-    #[clap(long = "Chost")]
+    #[clap(long, short, default_value = "info", help = "Log level: trace, debug, info, warn, error, off")]
+    pub(crate) log_level: Option<log::LevelFilter>,
+
+    #[clap(long, help = "Host to bind to. Overrides the config file")]
     pub(crate) host: Option<String>,
 
-    #[clap(long = "Cport")]
+    #[clap(long, help = "Port to bind to. Overrides the config file")]
     pub(crate) port: Option<u16>,
 }
 

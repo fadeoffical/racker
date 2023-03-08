@@ -1,8 +1,9 @@
 use chrono::Local;
 use fern::colors::Color;
 use fern::Dispatch;
+use crate::config::cli::Cli;
 
-pub(crate) fn init() {
+pub(crate) fn init(cli: &Cli) {
     let mut colors = fern::colors::ColoredLevelConfig::new();
     colors.info = Color::Green;
     colors.warn = Color::Yellow;
@@ -39,7 +40,7 @@ pub(crate) fn init() {
             ))
         })
         .filter(|metadata| metadata.target().starts_with("racker"))
-        .level(log::LevelFilter::Debug)
+        .level(cli.log_level.unwrap_or(log::LevelFilter::Info))
         .chain(std::io::stdout())
         .apply()
         .unwrap();
