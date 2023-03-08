@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
+use log::log;
 
 use crate::config::cli::Cli;
 use crate::log_error_and_panic;
@@ -20,28 +22,23 @@ pub(crate) fn load(arguments: Cli) -> Result<Config, Box<dyn Error>> {
         Some(path) => path,
     };
 
-    let config_file_path = match config_file_path.canonicalize() {
-        Ok(path) => path,
-        Err(err) => {
-            log::error!("Failed to canonicalize config file path: {}", err);
-            log::warn!("Using default config");
-
-            log::trace!("Returning config::load()");
-            return Err(Box::new(err));
-        }
-    };
-
     log::debug!("Config file path: {:?}", &config_file_path);
 
     if !&config_file_path.exists() {
         log::warn!("Config file not found at {:?}", &config_file_path);
         log::warn!("Creating default config file");
 
+        if let Some(config_file_dir) = config_file_path.parent() {
+            log::debug!("Creating config file directory: {:?}", &config_file_dir);
+            fs::create_dir_all(config_file_dir)?;
+        };
+
+        log::debug!("Creating config file: {:?}", &config_file_path);
         let mut file = match File::create(&config_file_path) {
             Ok(file) => file,
             Err(err) => {
                 log::error!(
-                    "Failed to open config file at {:?}: {}",
+                    "Failed to create config file at {:?}: {}",
                     &config_file_path,
                     err
                 );
@@ -51,8 +48,9 @@ pub(crate) fn load(arguments: Cli) -> Result<Config, Box<dyn Error>> {
             }
         };
 
-        let config = match file.write_all(CONFIG_FILE_DEFAULT_CONTENTS.as_bytes()) {
-            Ok(_) => Ok(Config::default()),
+        log::debug!("Writing default config to config file");
+        match file.write_all(CONFIG_FILE_DEFAULT_CONTENTS.as_bytes()) {
+            Ok(_) => log::debug!("Successfully wrote default config to config file"),
             Err(err) => {
                 log::error!(
                     "Failed to write to config file at {:?}: {}",
@@ -60,18 +58,12 @@ pub(crate) fn load(arguments: Cli) -> Result<Config, Box<dyn Error>> {
                     err
                 );
 
-                log::trace!("Returning config::load()");
-                Err(Box::new(err))
+                return Err(Box::new(err));
             }
-        };
-
-        // wtf
-        return match config {
-            Ok(config) => Ok(config),
-            Err(err) => Err(Box::new(err)),
         };
     }
 
+    log::debug!("Opening config file: {:?}", &config_file_path);
     let file = match File::open(&config_file_path) {
         Ok(file) => file,
         Err(err) => {
@@ -87,16 +79,20 @@ pub(crate) fn load(arguments: Cli) -> Result<Config, Box<dyn Error>> {
         }
     };
 
+    log::debug!("Parsing config file");
     let config = match serde_json::from_reader::<&File, Config>(&file) {
         Ok(mut config) => {
-            if let Some(port) = &arguments.port {
-                config.network.set_port(*port);
-            }
-
             if let Some(host) = &arguments.host {
+                log::debug!("Setting host to {}", host);
                 config.network.set_host(host);
             }
 
+            if let Some(port) = &arguments.port {
+                log::debug!("Setting port to {}", port);
+                config.network.set_port(*port);
+            }
+
+            log::debug!("Successfully parsed config file");
             Ok(config)
         }
         Err(err) => {
