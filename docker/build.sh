@@ -29,6 +29,9 @@ cp target/release/racker docker/racker
 cd docker || exit
 docker build -t "fadeoffical/racker:latest" .
 
+## Clean up
+rm racker
+
 ## Be done with it uwu
 # (p r o f e s s i o n a l i s m)
 echo "(+) Done"
