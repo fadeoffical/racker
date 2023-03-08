@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use racker_common::data::Network;
 
-const CONFIG_FILE_DEFAULT_PATH: &str = "racker.xml";
-const CONFIG_FILE_DEFAULT_CONTENTS: &str = include_str!("racker.xml");
+const CONFIG_FILE_DEFAULT_PATH: &str = "racker.json";
+const CONFIG_FILE_DEFAULT_CONTENTS: &str = include_str!("racker.json");
 
 pub(crate) fn load() -> Result<Config, io::Error> {
     log::trace!("Entered config::load()");
@@ -52,7 +52,7 @@ pub(crate) fn load() -> Result<Config, io::Error> {
         }
     };
 
-    let config = match serde_xml_rs::from_reader(&file) {
+    let config = match serde_json::from_reader(&file) {
         Ok(config) => Ok(config),
         Err(err) => {
             log::error!("Failed to parse config file: {}", err);
