@@ -35,7 +35,9 @@ pub struct Socials {
 impl Socials {
     /// Returns the github url of the author.
     pub fn github(&self) -> Option<String> {
-        self.github.as_ref().map(|github| String::from("https://github.com/") + github)
+        self.github
+            .as_ref()
+            .map(|github| String::from("https://github.com/") + github)
     }
 
     /// Returns the discord name and discriminator of the author.

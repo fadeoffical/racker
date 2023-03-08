@@ -1,14 +1,16 @@
-use std::io::Error;
-use std::sync::Mutex;
 use racker_plugin::PluginManager;
+use std::error::Error;
+use std::sync::Mutex;
+
+use crate::config::cli::Cli;
+use crate::config::cli::Parser;
 use crate::config::Config;
 
-mod logger;
 mod config;
-mod http;
 mod head;
+mod http;
+mod logger;
 mod plugin;
-mod cli;
 
 pub(crate) struct RackerState {
     pub(crate) config: Config,
@@ -21,7 +23,10 @@ async fn main() {
     log::debug!("Logger initialized");
     log::info!("Starting racker");
 
-    let config = load_config();
+    let cli = Cli::parse();
+
+    log::info!("Loading config");
+    let config = load_config(cli.clone());
 
     log::info!("Loading plugins");
     let mut plugin_manager = PluginManager::create().load_plugins();
@@ -39,9 +44,9 @@ async fn main() {
     log::info!("HTTP server stopped");
 }
 
-fn load_config() -> Config {
-    log::info!("Loading config");
-    let config = match config::load() {
+fn load_config(arguments: Cli) -> Config {
+    log::trace!("Entered main::load_config()");
+    let config = match config::load(arguments) {
         Ok(config) => {
             log::debug!("Config loaded successfully");
             config
@@ -53,10 +58,12 @@ fn load_config() -> Config {
     };
     log::debug!("Loaded config: {:?}", config);
 
+    log::trace!("Returning main::load_config()");
     config
 }
 
-fn log_error_and_panic(err: Error) -> ! {
+
+fn log_error_and_panic(err: Box<dyn Error>) -> ! {
     log::error!("Received unrecoverable error: {}", err);
     log::error!("Exiting");
     panic!()

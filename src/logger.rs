@@ -2,7 +2,6 @@ use chrono::Local;
 use fern::colors::Color;
 use fern::Dispatch;
 
-
 pub(crate) fn init() {
     let mut colors = fern::colors::ColoredLevelConfig::new();
     colors.info = Color::Green;
@@ -21,15 +20,23 @@ pub(crate) fn init() {
                     let file = file.split('/').last().unwrap_or(file);
 
                     &file[..file.len() - 3]
-                },
-                None => "?"
+                }
+                None => "?",
             };
-            let module = record.module_path().unwrap().split("::").next().unwrap_or("?");
+            let module = record
+                .module_path()
+                .unwrap()
+                .split("::")
+                .next()
+                .unwrap_or("?");
             let line = record.line().unwrap_or(0);
 
             let module = format!("{module}::{file}:{line}");
 
-            out.finish(format_args!("{}: {message}", format_args!("[{time}] [{level}] [{module}]")))
+            out.finish(format_args!(
+                "{}: {message}",
+                format_args!("[{time}] [{level}] [{module}]")
+            ))
         })
         .filter(|metadata| metadata.target().starts_with("racker"))
         .level(log::LevelFilter::Debug)

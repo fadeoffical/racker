@@ -1,8 +1,8 @@
-use std::path::PathBuf;
 use libloading::Library;
+use std::path::PathBuf;
 
-use crate::Plugin;
 use crate::manifest::PluginManifest;
+use crate::Plugin;
 
 pub type PluginId = usize;
 
@@ -89,8 +89,6 @@ impl PluginContainer {
     pub fn plugin_mut(&mut self) -> &mut dyn Plugin {
         self.plugin.as_mut().unwrap().as_mut()
     }
-
-
 }
 
 pub struct PluginReference {

@@ -1,50 +1,85 @@
-use std::fs::File;
-use std::io;
-use std::io::Write;
-use std::path::Path;
 use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::fs::File;
+use std::io::Write;
+use std::path::PathBuf;
 
-use racker_common::data::Network;
+use crate::config::cli::Cli;
+use crate::log_error_and_panic;
+use racker::common::data::Network;
 
-const CONFIG_FILE_DEFAULT_PATH: &str = "racker.json";
+pub(crate) mod cli;
+
 const CONFIG_FILE_DEFAULT_CONTENTS: &str = include_str!("racker.json");
 
-pub(crate) fn load() -> Result<Config, io::Error> {
+pub(crate) fn load(arguments: Cli) -> Result<Config, Box<dyn Error>> {
     log::trace!("Entered config::load()");
 
-    let path = Path::new(CONFIG_FILE_DEFAULT_PATH);
+    let config_file_path = match arguments.config_file {
+        None => PathBuf::from(cli::CONFIG_FILE_DEFAULT_PATH),
+        Some(path) => path,
+    };
 
-    if !path.exists() {
-        log::warn!("Config file not found at {}", CONFIG_FILE_DEFAULT_PATH);
+    let config_file_path = match config_file_path.canonicalize() {
+        Ok(path) => path,
+        Err(err) => {
+            log::error!("Failed to canonicalize config file path: {}", err);
+            log::warn!("Using default config");
+
+            log::trace!("Returning config::load()");
+            return Err(Box::new(err));
+        }
+    };
+
+    log::debug!("Config file path: {:?}", &config_file_path);
+
+    if !&config_file_path.exists() {
+        log::warn!("Config file not found at {:?}", &config_file_path);
         log::warn!("Creating default config file");
 
-        let mut file = match File::create(CONFIG_FILE_DEFAULT_PATH) {
+        let mut file = match File::create(&config_file_path) {
             Ok(file) => file,
             Err(err) => {
-                log::error!("Failed to open config file at {}: {}", CONFIG_FILE_DEFAULT_PATH, err);
+                log::error!(
+                    "Failed to open config file at {:?}: {}",
+                    &config_file_path,
+                    err
+                );
 
                 log::trace!("Returning config::load()");
-                return Err(err);
+                return Err(Box::new(err));
             }
         };
 
         let config = match file.write_all(CONFIG_FILE_DEFAULT_CONTENTS.as_bytes()) {
             Ok(_) => Ok(Config::default()),
             Err(err) => {
-                log::error!("Failed to write to config file at {}: {}", CONFIG_FILE_DEFAULT_PATH, err);
+                log::error!(
+                    "Failed to write to config file at {:?}: {}",
+                    &config_file_path,
+                    err
+                );
 
                 log::trace!("Returning config::load()");
-                Err(err)
+                Err(Box::new(err))
             }
         };
 
-        return config;
+        // wtf
+        return match config {
+            Ok(config) => Ok(config),
+            Err(err) => Err(Box::new(err)),
+        };
     }
 
-    let file = match File::open(CONFIG_FILE_DEFAULT_PATH) {
+    let file = match File::open(&config_file_path) {
         Ok(file) => file,
         Err(err) => {
-            log::error!("Failed to open config file at {}: {}", CONFIG_FILE_DEFAULT_PATH, err);
+            log::error!(
+                "Failed to open config file at {:?}: {}",
+                &config_file_path,
+                err
+            );
             log::warn!("Using default config");
 
             log::trace!("Returning config::load()");
@@ -52,14 +87,24 @@ pub(crate) fn load() -> Result<Config, io::Error> {
         }
     };
 
-    let config = match serde_json::from_reader(&file) {
-        Ok(config) => Ok(config),
+    let config = match serde_json::from_reader::<&File, Config>(&file) {
+        Ok(mut config) => {
+            if let Some(port) = &arguments.port {
+                config.network.set_port(*port);
+            }
+
+            if let Some(host) = &arguments.host {
+                config.network.set_host(host);
+            }
+
+            Ok(config)
+        }
         Err(err) => {
             log::error!("Failed to parse config file: {}", err);
             log::warn!("Using default config");
 
             log::trace!("Returning config::load()");
-            return Ok(Config::default());
+            log_error_and_panic(Box::new(err));
         }
     };
 

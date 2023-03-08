@@ -1,11 +1,11 @@
-pub mod plugin;
 pub mod manifest;
+pub mod plugin;
 
-use std::any::Any;
-use std::{fs, io};
-use std::path::PathBuf;
-use zip::ZipArchive;
 use crate::manifest::PluginManifest;
+use std::any::Any;
+use std::path::PathBuf;
+use std::{fs, io};
+use zip::ZipArchive;
 
 use crate::plugin::{PluginContainer, PluginState};
 
@@ -78,7 +78,10 @@ impl PluginManager {
                 continue;
             }
 
-            log::info!("Loading plugin: {}", &plugin_file.file_name().to_str().unwrap());
+            log::info!(
+                "Loading plugin: {}",
+                &plugin_file.file_name().to_str().unwrap()
+            );
 
             // temp/plugins/ + plugin.zip = temp/plugins/plugin.zip
             let tmp_plugin_path = plugin_run_dir.join(plugin_path.file_name().unwrap());
@@ -98,7 +101,8 @@ impl PluginManager {
     }
 
     fn unzip_plugins(&mut self) -> Result<(), io::Error> {
-        self.plugins.iter()
+        self.plugins
+            .iter()
             .map(|container| (container.tmp_dir(), container.tmp_file()))
             .for_each(|(_dir, plugin_file)| {
                 let plugin_file_name = &plugin_file.file_name().unwrap().to_str().unwrap();
@@ -116,24 +120,30 @@ impl PluginManager {
                 let plugin_manifest: PluginManifest = match serde_json::from_reader(plugin_file) {
                     Ok(manifest) => manifest,
                     Err(err) => {
-                        log::error!("Malformed plugin manifest for {}: {}", plugin_file_name, &err);
+                        log::error!(
+                            "Malformed plugin manifest for {}: {}",
+                            plugin_file_name,
+                            &err
+                        );
                         return;
                     }
                 };
 
-                log::debug!("Loaded plugin manifest for {}: {:?}", &plugin_file_name, plugin_manifest);
-
+                log::debug!(
+                    "Loaded plugin manifest for {}: {:?}",
+                    &plugin_file_name,
+                    plugin_manifest
+                );
             });
 
         Ok(())
     }
 
     fn load(&mut self) {
-        self.plugins.iter_mut()
-            .for_each(|container| {
-                // container.plugin().on_load(); todo
-                container.set_state(PluginState::Loaded)
-            });
+        self.plugins.iter_mut().for_each(|container| {
+            // container.plugin().on_load(); todo
+            container.set_state(PluginState::Loaded)
+        });
     }
 
     // pub fn load_plugin_from_file(&mut self, path: &str) {

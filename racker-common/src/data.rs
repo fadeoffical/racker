@@ -1,5 +1,5 @@
+use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
-use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -24,6 +24,14 @@ impl Network {
 
     pub fn port(&self) -> u16 {
         self.port
+    }
+
+    pub fn set_host(&mut self, host: &str) {
+        self.host = host.to_string();
+    }
+
+    pub fn set_port(&mut self, port: u16) {
+        self.port = port;
     }
 
     pub fn as_socket_addr(&self) -> SocketAddr {

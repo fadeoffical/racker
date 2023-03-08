@@ -1,5 +1,5 @@
+use actix_web::{web, HttpResponse};
 use std::sync::{MutexGuard, PoisonError};
-use actix_web::{HttpResponse, web};
 
 use serde::{Deserialize, Serialize};
 
@@ -19,9 +19,7 @@ pub(crate) struct V1Head {
 
 impl From<Head> for V1Head {
     fn from(head: Head) -> Self {
-        Self {
-            name: head.name,
-        }
+        Self { name: head.name }
     }
 }
 
@@ -36,22 +34,15 @@ pub(crate) async fn get(data: web::Data<RackerState>) -> HttpResponse {
         api_heads.push(api_head);
     });
 
-
-    HttpResponse::Ok().json(response::ok_with_data(V1Heads {
-        heads: api_heads,
-    }))
+    HttpResponse::Ok().json(response::ok_with_data(V1Heads { heads: api_heads }))
 }
 
 #[actix_web::post("/heads")]
-pub(crate) async fn post(
-    data: web::Data<RackerState>,
-    body: web::Json<V1Head>,
-) -> HttpResponse {
+pub(crate) async fn post(data: web::Data<RackerState>, body: web::Json<V1Head>) -> HttpResponse {
     let mut heads = match data.heads.lock() {
         Ok(heads) => heads,
         Err(err) => return error_lock_heads(err),
     };
-
 
     let head_name = body.name.clone();
     let head: Head = body.into_inner().into();
@@ -60,11 +51,11 @@ pub(crate) async fn post(
         Ok(_) => {
             log::info!("Registered head {}", head_name);
             HttpResponse::Ok().json(response::ok())
-        },
+        }
         Err(_) => {
             log::warn!("Tried to register head {} which already exists", head_name);
             HttpResponse::Conflict().json(response::error_with_data("Head already exists"))
-        },
+        }
     }
 }
 
@@ -84,11 +75,14 @@ pub(crate) async fn delete(
         Ok(_) => {
             log::info!("Unregistered head {}", head_name);
             HttpResponse::Ok().json(response::ok())
-        },
+        }
         Err(_) => {
-            log::warn!("Tried to unregister head {} which does not exist", head_name);
+            log::warn!(
+                "Tried to unregister head {} which does not exist",
+                head_name
+            );
             HttpResponse::NotFound().json(response::error_with_data("Head does not exist"))
-        },
+        }
     }
 }
 
@@ -104,14 +98,17 @@ pub(crate) async fn get_name(
         Err(err) => return error_lock_heads(err),
     };
 
-    let head = heads.get_all()
+    let head = heads
+        .get_all()
         .iter()
         .find(|head| head.name == head_name)
-        .map_or_else(|| None, |head| {
-            Some(V1Head {
-                name: head.name.clone(),
-            })
-        }
+        .map_or_else(
+            || None,
+            |head| {
+                Some(V1Head {
+                    name: head.name.clone(),
+                })
+            },
         );
 
     match head {

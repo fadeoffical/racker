@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 pub(crate) struct RackerConfig {
-
     /// The path to the config file
     config_file: Option<PathBuf>,
 }

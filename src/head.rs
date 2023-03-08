@@ -11,12 +11,9 @@ pub(crate) struct Head {
 
 impl From<v1::heads::V1Head> for Head {
     fn from(head: v1::heads::V1Head) -> Self {
-        Self {
-            name: head.name,
-        }
+        Self { name: head.name }
     }
 }
-
 
 pub(crate) struct Heads {
     pub(crate) heads: Vec<Head>,
@@ -24,9 +21,7 @@ pub(crate) struct Heads {
 
 impl Heads {
     pub(crate) fn new() -> Self {
-        Self {
-            heads: vec![],
-        }
+        Self { heads: vec![] }
     }
 
     pub(crate) fn register_head(&mut self, head: Head) -> Result<(), ()> {

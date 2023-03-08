@@ -1,7 +1,7 @@
 pub(crate) mod heads;
 
-use actix_web::HttpResponse;
 use crate::http::response;
+use actix_web::HttpResponse;
 
 #[actix_web::get("/")]
 pub(crate) async fn get() -> HttpResponse {

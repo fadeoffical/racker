@@ -1,23 +1,24 @@
 pub(crate) mod response;
 pub(crate) mod v1;
 
-use actix_web::{web, App, HttpServer, HttpResponse};
-use crate::http::response::{Apis, ApiInfo};
+use crate::http::response::{ApiInfo, Apis};
 use crate::RackerState;
+use actix_web::{web, App, HttpResponse, HttpServer};
 
 pub(crate) async fn start(state: RackerState) {
     let config = state.config.clone();
 
     let data = web::Data::new(state);
     let server = HttpServer::new(move || {
-        App::new().app_data(data.clone())
+        App::new()
+            .app_data(data.clone())
             .service(
                 web::scope("/v1")
                     .service(v1::get)
                     .service(v1::heads::get)
                     .service(v1::heads::post)
                     .service(v1::heads::delete)
-                    .service(v1::heads::get_name)
+                    .service(v1::heads::get_name),
             )
             .route("/", web::get().to(index))
     });
@@ -28,7 +29,7 @@ pub(crate) async fn start(state: RackerState) {
         Ok(server) => server,
         Err(err) => {
             log::error!("Failed to bind to {:?}", host);
-            crate::log_error_and_panic(err);
+            crate::log_error_and_panic(Box::new(err));
         }
     };
 
@@ -36,11 +37,10 @@ pub(crate) async fn start(state: RackerState) {
         Ok(_) => (),
         Err(err) => {
             log::error!("Failed to start HTTP server");
-            crate::log_error_and_panic(err);
+            crate::log_error_and_panic(Box::new(err));
         }
     };
 }
-
 
 async fn index() -> HttpResponse {
     HttpResponse::Ok().json(response::ok_with_data(ApiInfo {
