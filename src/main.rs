@@ -62,7 +62,6 @@ fn load_config(arguments: Cli) -> Config {
     config
 }
 
-
 fn log_error_and_panic(err: Box<dyn Error>) -> ! {
     log::error!("Received unrecoverable error: {}", err);
     log::error!("Exiting");

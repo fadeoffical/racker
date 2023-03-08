@@ -4,7 +4,6 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
-use log::log;
 
 use crate::config::cli::Cli;
 use crate::log_error_and_panic;
