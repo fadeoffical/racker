@@ -26,7 +26,10 @@ pub(crate) async fn start(state: RackerState) {
     let host = config.network().as_socket_addr();
 
     let server = match server.bind(host) {
-        Ok(server) => server,
+        Ok(server) => {
+            log::info!("Listening on {:?}", host);
+            server
+        },
         Err(err) => {
             log::error!("Failed to bind to {:?}", host);
             crate::log_error_and_panic(Box::new(err));
