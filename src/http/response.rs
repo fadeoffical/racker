@@ -24,12 +24,6 @@ pub(crate) fn error_with_data<E>(error: E) -> Response<(), E> {
     Response::Error { error: Some(error) }
 }
 
-// #[derive(Debug, Serialize)]
-// pub(crate) enum Status {
-//     Ok,
-//     Error,
-// }
-
 #[derive(Debug, Serialize)]
 pub(crate) struct ApiInfo {
     pub(crate) api: Apis,
