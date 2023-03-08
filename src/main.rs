@@ -8,6 +8,7 @@ mod config;
 mod http;
 mod head;
 mod plugin;
+mod cli;
 
 pub(crate) struct RackerState {
     pub(crate) config: Config,
