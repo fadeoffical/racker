@@ -1,9 +1,10 @@
+pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod v1;
 
 use crate::http::response::{ApiInfo, Apis};
 use crate::RackerState;
-use actix_web::{web, App, HttpResponse, HttpServer};
+use actix_web::{web, HttpResponse, HttpServer, App};
 
 pub(crate) async fn start(state: RackerState) {
     let config = state.config.clone();
@@ -18,7 +19,9 @@ pub(crate) async fn start(state: RackerState) {
                     .service(v1::heads::get)
                     .service(v1::heads::post)
                     .service(v1::heads::delete)
-                    .service(v1::heads::get_name),
+                    .service(v1::heads::get_name)
+                    .service(v1::auth::get)
+                    .service(v1::auth::get_login)
             )
             .route("/", web::get().to(index))
     });

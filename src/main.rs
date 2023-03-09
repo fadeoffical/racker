@@ -2,19 +2,19 @@ use racker_plugin::PluginManager;
 use std::error::Error;
 use std::sync::Mutex;
 
-use crate::config::cli::Cli;
-use crate::config::cli::Parser;
 use crate::config::Config;
+use crate::user::{Permission, User};
 
 mod config;
 mod head;
 mod http;
 mod logger;
-mod plugin;
+mod user;
 
 pub(crate) struct RackerState {
     pub(crate) config: Config,
     pub(crate) heads: Mutex<head::Heads>,
+    pub(crate) users: Mutex<Vec<User>>,
 }
 
 #[actix_web::main]
@@ -36,6 +36,14 @@ async fn main() {
     let state = RackerState {
         config,
         heads: Mutex::from(head::default()),
+        users: Mutex::new(vec![
+            User {
+                username: "fade".to_string(),
+                permissions: vec![
+                    Permission::All,
+                ],
+            }
+        ]),
     };
     log::debug!("State created");
 
