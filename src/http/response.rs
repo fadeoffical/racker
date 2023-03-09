@@ -6,7 +6,7 @@ use serde::Serialize;
 pub(crate) enum Response<T, R> {
     Ok {
         message: Option<String>,
-        data: Option<T>
+        data: Option<T>,
     },
     Error {
         message: Option<String>,
@@ -17,7 +17,7 @@ pub(crate) enum Response<T, R> {
 pub(crate) fn ok() -> Response<(), ()> {
     Response::Ok {
         message: None,
-        data: None
+        data: None,
     }
 }
 
@@ -31,21 +31,21 @@ pub(crate) fn error() -> Response<(), ()> {
 pub(crate) fn ok_with_data<T>(data: T) -> Response<T, ()> {
     Response::Ok {
         message: None,
-        data: Some(data)
+        data: Some(data),
     }
 }
 
 pub(crate) fn ok_with_message(message: String) -> Response<(), ()> {
     Response::Ok {
         message: Some(message),
-        data: None
+        data: None,
     }
 }
 
 pub(crate) fn ok_with_message_and_data<T>(message: String, data: T) -> Response<T, ()> {
     Response::Ok {
         message: Some(message),
-        data: Some(data)
+        data: Some(data),
     }
 }
 

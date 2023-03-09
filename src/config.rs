@@ -5,9 +5,9 @@ use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use racker::common::data::Network;
 use crate::cli;
 use crate::cli::Cli;
+use racker::common::data::Network;
 
 const CONFIG_FILE_DEFAULT_CONTENTS: &str = include_str!("include/racker.json");
 
@@ -24,7 +24,11 @@ pub(crate) fn load(cli: Cli) -> Result<Config, Box<dyn Error>> {
     let file = match config_file_from_path(&config_file_path) {
         Ok(file) => file,
         Err(err) => {
-            log::error!("Failed to open config file at {:?}: {}", &config_file_path, err);
+            log::error!(
+                "Failed to open config file at {:?}: {}",
+                &config_file_path,
+                err
+            );
 
             log::trace!("<- config::load()");
             return Err(err);
@@ -115,7 +119,6 @@ fn write_default_config_file(file: &mut File) -> Result<(), Box<dyn Error>> {
     log::trace!("<- config::write_default_config_file()");
     Ok(())
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "kebab-case")]

@@ -1,7 +1,7 @@
-use actix_web::{HttpResponse, web};
-use crate::http::response;
-use serde::{Deserialize, Serialize};
 use crate::http::request::Request;
+use crate::http::response;
+use actix_web::{web, HttpResponse};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Auth {
@@ -15,13 +15,14 @@ pub(crate) async fn get() -> HttpResponse {
 }
 
 #[actix_web::get("/auth/login")]
-pub(crate) async fn get_login(
-    body: web::Json<Request<Auth>>,
-) -> HttpResponse {
+pub(crate) async fn get_login(body: web::Json<Request<Auth>>) -> HttpResponse {
     let body = body.into_inner();
 
     if body.auth.is_some() {
-        return HttpResponse::Ok().json(response::error_with_message_and_data("already logged in".to_string(), body.auth));
+        return HttpResponse::Ok().json(response::error_with_message_and_data(
+            "already logged in".to_string(),
+            body.auth,
+        ));
     }
 
     let auth = match body.data {

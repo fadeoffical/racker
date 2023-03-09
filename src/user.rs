@@ -1,12 +1,16 @@
+use clap::builder::Str;
+
 pub(crate) struct User {
     pub(crate) username: String,
+    pub(crate) password: String, // todo: MAJOR FUCKING SECURITY ISSUE
     pub(crate) permissions: Vec<Permission>,
 }
 
 impl User {
-    pub(crate) fn new(username: String, permissions: Vec<Permission>) -> Self {
+    pub(crate) fn new(username: String, password: String, permissions: Vec<Permission>) -> Self {
         Self {
             username,
+            password,
             permissions,
         }
     }
@@ -15,7 +19,9 @@ impl User {
 impl Default for User {
     fn default() -> Self {
         Self {
-            username: "User".to_string(),
+            // todo: REMOVE THIS
+            username: "admin".to_string(),
+            password: "password".to_string(),
             permissions: vec![
                 Permission::User(UserPermission::Query(UserPermissionTarget::This)),
                 Permission::User(UserPermission::Update(UserPermissionTarget::This)),

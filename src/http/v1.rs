@@ -1,5 +1,5 @@
-pub(crate) mod heads;
 pub(crate) mod auth;
+pub(crate) mod heads;
 
 use crate::http::response;
 use actix_web::HttpResponse;

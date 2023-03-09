@@ -1,7 +1,7 @@
+use crate::cli::Cli;
 use chrono::Local;
 use fern::colors::Color;
 use fern::Dispatch;
-use crate::cli::Cli;
 
 pub(crate) fn init(cli: &Cli) {
     let mut colors = fern::colors::ColoredLevelConfig::new();

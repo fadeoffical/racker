@@ -1,8 +1,8 @@
+use crate::cli::Cli;
+use clap::Parser;
 use racker_plugin::PluginManager;
 use std::error::Error;
 use std::sync::Mutex;
-use clap::Parser;
-use crate::cli::Cli;
 
 use crate::config::Config;
 use crate::user::{Permission, User};
@@ -28,7 +28,6 @@ async fn main() {
     log::debug!("Logger initialized");
     log::info!("Starting racker");
 
-
     log::info!("Loading config");
     let config = load_config(cli.clone());
 
@@ -39,14 +38,11 @@ async fn main() {
     let state = RackerState {
         config,
         heads: Mutex::from(head::default()),
-        users: Mutex::new(vec![
-            User {
-                username: "fade".to_string(),
-                permissions: vec![
-                    Permission::All,
-                ],
-            }
-        ]),
+        users: Mutex::new(vec![User::new(
+            "admin".to_string(),
+            "password".to_string(),
+            vec![Permission::All],
+        )]),
     };
     log::debug!("State created");
 

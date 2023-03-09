@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 // use is public so that the parse method can be called outside of this module
 // and we dont have to clap::Parser but instead can use this one (looks cleaner)
-pub(crate) use clap::Parser;
 use crate::config::Config;
+pub(crate) use clap::Parser;
 
 pub(crate) const CONFIG_FILE_DEFAULT_PATH: &str = "/etc/racker/racker.json";
 
@@ -13,7 +13,12 @@ pub(crate) struct Cli {
     #[clap(short, long, default_value = CONFIG_FILE_DEFAULT_PATH, help = "Path to the config file")]
     pub(crate) config_file: Option<PathBuf>,
 
-    #[clap(long, short, default_value = "info", help = "Log level: trace, debug, info, warn, error, off")]
+    #[clap(
+        long,
+        short,
+        default_value = "info",
+        help = "Log level: trace, debug, info, warn, error, off"
+    )]
     pub(crate) log_level: Option<log::LevelFilter>,
 
     #[clap(long, help = "Host to bind to. Overrides the config file")]
