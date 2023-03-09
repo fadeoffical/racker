@@ -1,10 +1,13 @@
 use racker_plugin::PluginManager;
 use std::error::Error;
 use std::sync::Mutex;
+use clap::Parser;
+use crate::cli::Cli;
 
 use crate::config::Config;
 use crate::user::{Permission, User};
 
+mod cli;
 mod config;
 mod head;
 mod http;

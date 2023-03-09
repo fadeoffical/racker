@@ -5,12 +5,11 @@ use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use crate::config::cli::Cli;
 use racker::common::data::Network;
+use crate::cli;
+use crate::cli::Cli;
 
-pub(crate) mod cli;
-
-const CONFIG_FILE_DEFAULT_CONTENTS: &str = include_str!("racker.json");
+const CONFIG_FILE_DEFAULT_CONTENTS: &str = include_str!("include/racker.json");
 
 pub(crate) fn load(cli: Cli) -> Result<Config, Box<dyn Error>> {
     log::trace!("-> config::load()");
@@ -121,7 +120,7 @@ fn write_default_config_file(file: &mut File) -> Result<(), Box<dyn Error>> {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct Config {
-    network: Network,
+    pub(crate) network: Network,
 }
 
 impl Default for Config {
