@@ -5,7 +5,7 @@ use std::error::Error;
 use std::sync::Mutex;
 
 use crate::config::Config;
-use crate::user::{Permission, User};
+use crate::user::{Permission, User, UserPermission, UserPermissionTarget};
 
 mod cli;
 mod config;
@@ -41,7 +41,10 @@ async fn main() {
         users: Mutex::new(vec![User::new(
             "admin".to_string(),
             "password".to_string(),
-            vec![Permission::All],
+            vec![
+                Permission::All,
+                Permission::User(UserPermission::Query(UserPermissionTarget::Own)),
+            ],
         )]),
     };
     log::debug!("State created");

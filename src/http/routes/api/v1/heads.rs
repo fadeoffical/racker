@@ -23,7 +23,7 @@ impl From<Head> for V1Head {
     }
 }
 
-#[actix_web::get("/heads")]
+#[actix_web::get("")]
 pub(crate) async fn get(data: web::Data<RackerState>) -> HttpResponse {
     let mut api_heads = Vec::new();
 
@@ -37,7 +37,7 @@ pub(crate) async fn get(data: web::Data<RackerState>) -> HttpResponse {
     HttpResponse::Ok().json(response::ok_with_data(V1Heads { heads: api_heads }))
 }
 
-#[actix_web::post("/heads")]
+#[actix_web::post("")]
 pub(crate) async fn post(data: web::Data<RackerState>, body: web::Json<V1Head>) -> HttpResponse {
     let mut heads = match data.heads.lock() {
         Ok(heads) => heads,
@@ -45,7 +45,9 @@ pub(crate) async fn post(data: web::Data<RackerState>, body: web::Json<V1Head>) 
     };
 
     let head_name = body.name.clone();
-    let head: Head = body.into_inner().into();
+    let head: Head = Head {
+        name: body.name.clone(),
+    };
 
     match heads.register_head(head) {
         Ok(_) => {
@@ -54,12 +56,14 @@ pub(crate) async fn post(data: web::Data<RackerState>, body: web::Json<V1Head>) 
         }
         Err(_) => {
             log::warn!("Tried to register head {} which already exists", head_name);
-            HttpResponse::Conflict().json(response::error_with_data("Head already exists"))
+            HttpResponse::Conflict().json(response::error_with_message(
+                "Head already exists".to_string(),
+            ))
         }
     }
 }
 
-#[actix_web::delete("/heads/{name}")]
+#[actix_web::delete("/{name}")]
 pub(crate) async fn delete(
     data: web::Data<RackerState>,
     path: web::Path<(String,)>,
@@ -81,12 +85,14 @@ pub(crate) async fn delete(
                 "Tried to unregister head {} which does not exist",
                 head_name
             );
-            HttpResponse::NotFound().json(response::error_with_data("Head does not exist"))
+            HttpResponse::Conflict().json(response::error_with_message(
+                "Head does not exist".to_string(),
+            ))
         }
     }
 }
 
-#[actix_web::get("/heads/{name}")]
+#[actix_web::get("/{name}")]
 pub(crate) async fn get_name(
     data: web::Data<RackerState>,
     path: web::Path<(String,)>,

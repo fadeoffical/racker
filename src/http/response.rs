@@ -5,11 +5,17 @@ use serde::Serialize;
 #[serde(tag = "status")]
 pub(crate) enum Response<T, R> {
     Ok {
+        #[serde(skip_serializing_if = "Option::is_none")]
         message: Option<String>,
+
+        #[serde(skip_serializing_if = "Option::is_none")]
         data: Option<T>,
     },
     Error {
+        #[serde(skip_serializing_if = "Option::is_none")]
         message: Option<String>,
+
+        #[serde(skip_serializing_if = "Option::is_none")]
         error: Option<R>,
     },
 }
@@ -77,6 +83,12 @@ pub(crate) struct ApiInfo {
 
 #[derive(Debug, Serialize)]
 pub(crate) struct Apis {
-    pub(crate) latest: String,
-    pub(crate) supported: Vec<String>,
+    pub(crate) latest: Api,
+    pub(crate) supported: Vec<Api>,
+}
+
+#[derive(Debug, Serialize)]
+pub(crate) struct Api {
+    pub(crate) version: String,
+    pub(crate) route: String,
 }

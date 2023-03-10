@@ -9,13 +9,16 @@ pub(crate) struct Auth {
     password: String,
 }
 
-#[actix_web::get("/auth")]
+#[actix_web::get("")]
 pub(crate) async fn get() -> HttpResponse {
     HttpResponse::Ok().json(response::ok())
 }
 
-#[actix_web::get("/auth/login")]
-pub(crate) async fn get_login(body: web::Json<Request<Auth>>) -> HttpResponse {
+#[actix_web::get("/login")]
+pub(crate) async fn get_login(
+    body: web::Json<Request<Auth>>,
+    data: web::Data<crate::RackerState>,
+) -> HttpResponse {
     let body = body.into_inner();
 
     if body.auth.is_some() {
@@ -33,13 +36,14 @@ pub(crate) async fn get_login(body: web::Json<Request<Auth>>) -> HttpResponse {
     let username = auth.username;
     let password = auth.password;
 
-    if username != "admin" {
-        return HttpResponse::Ok().json(response::error_with_data("invalid username"));
-    }
-
-    if password != "admin" {
-        return HttpResponse::Ok().json(response::error_with_data("invalid password"));
-    }
-
-    HttpResponse::Ok().json(response::ok_with_data("logged in"))
+    let users = data.users.lock().unwrap();
+    return users
+        .iter()
+        .find(|user| user.username == username && user.password == password)
+        .map(|user| HttpResponse::Ok().json(response::ok_with_data(user)))
+        .unwrap_or_else(|| {
+            HttpResponse::Unauthorized().json(response::error_with_message(
+                "invalid username or password".to_string(),
+            ))
+        });
 }

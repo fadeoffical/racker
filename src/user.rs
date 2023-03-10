@@ -1,8 +1,11 @@
-use clap::builder::Str;
+use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct User {
     pub(crate) username: String,
-    pub(crate) password: String, // todo: MAJOR FUCKING SECURITY ISSUE
+
+    // todo: MAJOR FUCKING SECURITY ISSUE
+    pub(crate) password: String,
     pub(crate) permissions: Vec<Permission>,
 }
 
@@ -23,13 +26,14 @@ impl Default for User {
             username: "admin".to_string(),
             password: "password".to_string(),
             permissions: vec![
-                Permission::User(UserPermission::Query(UserPermissionTarget::This)),
-                Permission::User(UserPermission::Update(UserPermissionTarget::This)),
+                Permission::User(UserPermission::Query(UserPermissionTarget::Own)),
+                Permission::User(UserPermission::Update(UserPermissionTarget::Own)),
             ],
         }
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum Permission {
     All,
     Head(HeadPermission),
@@ -37,14 +41,17 @@ pub(crate) enum Permission {
     User(UserPermission),
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum HeadPermission {
     Query,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum PluginPermission {
     Query,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum UserPermission {
     Create,
 
@@ -53,7 +60,8 @@ pub(crate) enum UserPermission {
     Query(UserPermissionTarget),
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum UserPermissionTarget {
-    This,
+    Own,
     Other,
 }

@@ -1,5 +1,3 @@
-use crate::http::v1;
-
 pub(crate) fn default() -> Heads {
     Heads::new()
 }
@@ -7,12 +5,6 @@ pub(crate) fn default() -> Heads {
 #[derive(Clone)]
 pub(crate) struct Head {
     pub(crate) name: String,
-}
-
-impl From<v1::heads::V1Head> for Head {
-    fn from(head: v1::heads::V1Head) -> Self {
-        Self { name: head.name }
-    }
 }
 
 pub(crate) struct Heads {

@@ -1,6 +1,6 @@
 pub(crate) mod request;
 pub(crate) mod response;
-pub(crate) mod v1;
+mod routes;
 
 use crate::http::response::{ApiInfo, Apis};
 use crate::RackerState;
@@ -13,17 +13,25 @@ pub(crate) async fn start(state: RackerState) {
     let server = HttpServer::new(move || {
         App::new()
             .app_data(data.clone())
+            .service(routes::get)
             .service(
-                web::scope("/v1")
-                    .service(v1::get)
-                    .service(v1::heads::get)
-                    .service(v1::heads::post)
-                    .service(v1::heads::delete)
-                    .service(v1::heads::get_name)
-                    .service(v1::auth::get)
-                    .service(v1::auth::get_login),
+                web::scope("/api").service(routes::api::get).service(
+                    web::scope("/v1")
+                        .service(routes::api::v1::get)
+                        .service(
+                            web::scope("/heads")
+                                .service(routes::api::v1::heads::get)
+                                .service(routes::api::v1::heads::post)
+                                .service(routes::api::v1::heads::delete)
+                                .service(routes::api::v1::heads::get_name),
+                        )
+                        .service(
+                            web::scope("/auth")
+                                .service(routes::api::v1::auth::get)
+                                .service(routes::api::v1::auth::get_login),
+                        ),
+                ),
             )
-            .route("/", web::get().to(index))
     });
 
     let host = config.network().as_socket_addr();
@@ -45,13 +53,4 @@ pub(crate) async fn start(state: RackerState) {
             crate::log_error_and_panic(Box::new(err));
         }
     };
-}
-
-async fn index() -> HttpResponse {
-    HttpResponse::Ok().json(response::ok_with_data(ApiInfo {
-        api: Apis {
-            latest: "v1".to_string(),
-            supported: vec!["v1".to_string()],
-        },
-    }))
 }
